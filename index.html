@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+
+ <link rel="stylesheet" href="site-common.css">
+ <script src="site-common.js" defer></script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>英雄育成‐素材計算ツール</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{font-family:'Rajdhani','Hiragino Sans','Noto Sans JP',sans-serif;background:#0f172a linear-gradient(135deg,#0f172a 0%,#1e3a8a 50%,#0f172a 100%) fixed;color:#f1f5f9;min-height:100%;padding:calc(1rem + env(safe-area-inset-top,0px)) 1rem calc(1rem + env(safe-area-inset-bottom,0px))}
+.container{max-width:1500px;margin:0 auto}
+.header{background:linear-gradient(to right,#2563eb,#9333ea);padding:1.2rem;border-radius:.5rem;margin-bottom:1.5rem;box-shadow:0 0 20px rgba(59,130,246,.5),inset 0 0 20px rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);text-align:center}
+.header h1{font-family:'Orbitron','Rajdhani','Hiragino Sans',sans-serif;font-size:clamp(1.3rem,5vw,2.2rem);font-weight:900;letter-spacing:.08em;text-shadow:0 0 10px rgba(59,130,246,.8)}
+.header p{color:#bfdbfe;margin-top:.4rem;font-size:.95rem}
+.grid{display:grid;grid-template-columns:minmax(0,1fr);gap:1.2rem;max-width:480px;margin:0 auto;align-items:start}
+@media(min-width:1024px){.grid{grid-template-columns:repeat(3,minmax(0,480px));max-width:1500px;justify-content:center}}
+.card{background:rgba(30,41,59,.5);backdrop-filter:blur(10px);padding:.6rem 1rem 1rem;border-radius:.5rem;box-shadow:0 0 20px rgba(59,130,246,.5),inset 0 0 20px rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3)}
+.card-header{display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;padding:.35rem 0;margin-bottom:.4rem;-webkit-tap-highlight-color:transparent}
+.card-header h2{font-size:1.6rem;font-weight:800;letter-spacing:.06em;color:#bfdbfe;text-shadow:0 0 10px rgba(96,165,250,.8)}.card-header{border-bottom:1px solid rgba(96,165,250,.35)}
+.ci{display:flex;align-items:center;justify-content:center;width:2.4rem;height:2.4rem;font-size:1.4rem;color:#bfdbfe;background:rgba(59,130,246,.25);border:1px solid #60a5fa;border-radius:50%;box-shadow:0 0 10px rgba(96,165,250,.5);transition:transform .3s}
+.card-header:hover .ci{background:#2563eb}
+.card.collapsed .ci{transform:rotate(-90deg)}
+.card.collapsed .card-content{display:none}
+.card.collapsed .card-header{margin-bottom:0}
+.ctl{padding:.5rem .75rem;margin-bottom:.5rem;border:1px solid rgba(59,130,246,.2);border-left:5px solid var(--c);border-radius:.5rem;background:rgba(15,23,42,.6)}
+.hd{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:1rem}
+.hd span{font-weight:700;color:var(--c)}.hd b{font-size:1.05rem;color:#f1f5f9}
+.no{display:inline-block;background:#3b82f6;color:#fff;border-radius:50%;min-width:1.6em;height:1.6em;line-height:1.6em;text-align:center;margin-left:6px;font-size:1.15em;font-weight:800}
+.hd .no{color:#fff}
+.nt{display:none;font-size:.8rem;color:#94a3b8;margin-top:.2rem}
+.ctl.locked{--c:#64748b!important;opacity:.5;filter:grayscale(1)}
+.ctl.locked .nt{display:block}.ctl.locked .sl,.ctl.locked .pills,.ctl.locked .stars{display:none}
+.sl{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;cursor:pointer;--fill:0%}
+.sl::-webkit-slider-runnable-track{height:8px;border-radius:999px;background:linear-gradient(to right,var(--c) var(--fill),rgba(148,163,184,.25) var(--fill))}
+.sl::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;margin-top:-6px;border-radius:50%;background:#fff;border:2px solid var(--c);box-shadow:0 0 6px var(--c)}
+.sl::-moz-range-track{height:8px;border-radius:999px;background:rgba(148,163,184,.25)}
+.sl::-moz-range-progress{height:8px;border-radius:999px;background:var(--c)}
+.sl::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:2px solid var(--c)}
+.pills{display:flex;gap:5px;flex-wrap:wrap}.qk{margin:.4rem 0 .2rem;padding-bottom:.4rem;border-bottom:1px dashed rgba(148,163,184,.3)}
+.pills button,.btn{border:none;background:#334155;color:#d1d5db;border-radius:.375rem;padding:.4rem .8rem;font:600 .9rem 'Rajdhani','Hiragino Sans',sans-serif;cursor:pointer;transition:all .3s}
+.pills button:hover,.btn:hover{background:#475569}
+.pills button.on{background:var(--c);color:#0f172a;box-shadow:0 0 12px var(--c)}
+.pills button:disabled{opacity:.35;cursor:default}
+.stars{display:flex;gap:2px;justify-content:center}
+.stars button{border:0;background:none;font-size:2.3rem;line-height:1;padding:0 4px;color:#475569;cursor:pointer}
+.stars button.on{color:var(--c);text-shadow:0 0 10px var(--c)}
+.btn{margin-top:.3rem;background:#1e40af;color:#fff}.btn:hover{background:#2563eb;box-shadow:0 0 20px rgba(37,99,235,.5)}
+.prices{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.7rem;font-size:.95rem;color:#cbd5e1}
+.prices label{display:flex;justify-content:space-between;align-items:center}
+.prices input{width:110px;padding:.3rem .7rem;border-radius:.375rem;border:1px solid rgba(59,130,246,.3);background:rgba(15,23,42,.6);color:#fff;font:600 16px 'Rajdhani',sans-serif}
+.prices input:focus{outline:none;border-color:#60a5fa;box-shadow:0 0 0 3px rgba(96,165,250,.15)}
+.tot{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-bottom:.7rem}
+.tot>div,.rb{background:linear-gradient(135deg,rgba(30,41,59,.8),rgba(15,23,42,.9));border-left:3px solid #3b82f6;padding:.35rem .75rem;border-radius:.375rem}
+.tot small,.rb small{display:block;color:#9ca3af;font-size:.78rem}
+.tot strong{font-size:1.35rem;overflow-wrap:anywhere}.tot strong small{display:inline}
+.tot .gold{grid-column:1/-1;border-left-color:#eab308;background:linear-gradient(to right,rgba(202,138,4,.3),rgba(234,179,8,.3))}
+.tot .gold strong{font-size:1.9rem;font-weight:900;color:#fde047}
+.rb{border-left:5px solid var(--c);margin-bottom:.4rem}
+.rn{font-weight:700;color:var(--c);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.rm{font-size:.85rem;color:#cbd5e1;font-weight:600}
+.rv{display:grid;grid-template-columns:1fr 1fr;gap:.1rem .6rem;margin-top:.15rem}
+.rv b{font-size:1.1rem}.rv b.y{color:#fde047}.sub-h{display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;padding:.4rem .6rem;border-radius:.375rem;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);font-weight:800;font-size:1.1rem;color:#bfdbfe;margin-bottom:.4rem}.ci.sm{width:1.9rem;height:1.9rem;font-size:1.1rem}.sub.collapsed .ci{transform:rotate(-90deg)}.sub.collapsed .sub-b{display:none}
+.note{color:#64748b;font-size:.75rem;margin-top:.6rem}
+@media(hover:hover){.card{transition:all .3s}.card:hover{box-shadow:0 0 30px rgba(59,130,246,.6)}}
+</style></head><body><div class="container">
+<div class="header"><h1>英雄育成 - 素材計算ツール</h1><p>星数・専用・覚醒レベル・覚醒スキル の要求素材と推定金額を計算</p></div>
+<div class="grid">
+ <section class="card"><div class="card-header" role="button" tabindex="0"><h2>① 現在値</h2><span class="ci">▼</span></div><div class="card-content" id="pc"></div></section>
+ <section class="card"><div class="card-header" role="button" tabindex="0"><h2>② 目標値</h2><span class="ci">▼</span></div><div class="card-content"><div id="pt"></div><button class="btn" id="rs">目標を現在値にリセット</button></div></section>
+ <section class="card"><div class="card-header" role="button" tabindex="0"><h2>③ 必要素材</h2><span class="ci">▼</span></div><div class="card-content">
+  <div class="prices"><label>専用Lv1 単価 ¥<input type="number" id="psp" value="130" min="0" inputmode="numeric"></label><label>覚醒石 単価 ¥<input type="number" id="pst" value="13" min="0" inputmode="numeric"></label></div>
+  <div class="tot" id="tot"></div><div class="sub"><div class="sub-h" role="button" tabindex="0"><span>各要素別の必要素材</span><span class="ci sm">▼</span></div><div class="sub-b" id="rows"></div></div>
+  <p class="note">金額は比較的安いギフトから計算される単価×必要数の概算（専用Lv1・覚醒石のみ）。高額ギフトなどで大量に購入する際は単価の調整が必要。専用Lv1スキル1個は専用破片ｘ25相当として（）内に表示。専用レベルは累計 3^(Lv-1) 個。未解禁の項目は計算に含まれません。</p>
+ </div></section>
+</div>
+<script>
+const zen=s=>String(s).replace(/[0-9]/g,c=>String.fromCharCode(c.charCodeAt(0)+65248));
+const rep=(n,v)=>Array(n).fill(v);
+const pw=(a,b)=>{const r=[];for(let L=a;L<b;L++)r.push(Math.pow(3,L)-Math.pow(3,L-1));return r};
+const F=[
+ {id:'star',name:'⭐ 星数',col:'#fde047',min:0,max:5,S:5,stars:1,fmt:l=>l?'★'+l:'☆0(未所持)',c:{frag:[10,20,60,180,360]}},
+ {id:'spec',name:'🔷 専用レベル',col:'#c084fc',min:1,max:10,S:1,fmt:l=>'専用'+l,c:{sp:pw(1,10)}},
+ {id:'aw',name:'🔥 覚醒レベル',col:'#fb923c',min:1,max:40,S:5,fmt:l=>'覚醒Lv'+l,quick:[10,20,30,40],note:zen('星数5 かつ 専用5以上'),c:{frag:[...rep(9,10),...rep(10,20),...rep(10,30),...rep(10,50)],sp:[...rep(9,0),...rep(10,10),...rep(10,20),...rep(10,40)]}},
+ ...[1,2,3,4].map(n=>({id:'s'+n,name:'✨ 覚醒スキル<span class="no">'+zen(n)+'</span>',col:'#60a5fa',min:1,max:10,S:5,fmt:l=>'ランク'+l,note:zen(n==1?'星数5 かつ 専用5以上':'覚醒Lv'+(n*10-10)+'以上'),c:{st:[75,75,150,150,225,225,300,400,650]}}))
+];
+const cum=(a,S)=>{const o=[0];a.forEach((v,i)=>{for(let s=1;s<=S;s++)o.push(o[i*S]+v*s/S)});return o};
+F.forEach(f=>{f.cum={};for(const k in f.c)f.cum[k]=cum(f.c[k],f.S);f.mx=(f.max-f.min)*f.S});
+const cur={},tgt={};F.forEach(f=>{cur[f.id]=0;tgt[f.id]=0});cur.star=tgt.star=25;cur.spec=tgt.spec=4;
+const lvOf=(f,p)=>f.min+Math.floor(p/f.S);
+const lab=(f,p)=>{const l=lvOf(f,p);return zen(f.fmt(l)+(f.S>1&&p<f.mx&&p%f.S?'・'+(p%f.S)+'段':''))};
+const base=s=>s.star>=25&&s.spec>=4,awL=s=>1+Math.floor(s.aw/5);
+const UN={aw:base,s1:base,s2:s=>base(s)&&awL(s)>=10,s3:s=>base(s)&&awL(s)>=20,s4:s=>base(s)&&awL(s)>=30};
+const unl=(id,s)=>UN[id]?UN[id](s):true,eff=(id,s)=>unl(id,s)?s[id]:0;
+const ctls=[];
+function build(box,st,isT){
+ F.forEach(f=>{
+  const d=document.createElement('div');d.className='ctl';d.style.setProperty('--c',f.col);
+  d.innerHTML='<div class="hd"><span>'+f.name+'</span><b></b></div>'+(f.quick?'<div class="pills qk"></div>':'')+(f.stars?'<div class="stars"></div>':'<input class="sl" type="range" min="'+f.min+'" max="'+f.max+'" step="1">')+(f.S>1?'<div class="pills"></div>':'')+(f.note?'<div class="nt">🔒 解禁条件：'+f.note+'</div>':'');
+  box.appendChild(d);
+  const sl=d.querySelector('.sl'),b=d.querySelector('b'),pl=d.querySelector('.pills:not(.qk)'),sr=d.querySelector('.stars');
+  const set=p=>change(f.id,p,isT);
+  if(sl)sl.oninput=()=>{const l=+sl.value;set(l>=f.max?f.mx:(l-f.min)*f.S)};
+  if(pl)for(let s=0;s<f.S;s++){const x=document.createElement('button');x.textContent=s+'段';x.onclick=()=>{if(st[f.id]<f.mx)set(Math.floor(st[f.id]/f.S)*f.S+s)};pl.appendChild(x)}
+  const qk=d.querySelector('.qk');if(qk)f.quick.forEach(L=>{const x=document.createElement('button');x.textContent=zen('Lv'+L);x.onclick=()=>set((L-f.min)*f.S);qk.appendChild(x)});
+  if(sr)for(let i=1;i<=5;i++){const x=document.createElement('button');x.textContent='★';x.onclick=()=>{const n=lvOf(f,st[f.id])===i?i-1:i;set(n>=f.max?f.mx:n*f.S)};sr.appendChild(x)}
+  ctls.push(()=>{const p=st[f.id],l=lvOf(f,p),lk=!unl(f.id,st);d.classList.toggle('locked',lk);b.textContent=lk?'🔒 未解禁':lab(f,p);
+   if(sl){sl.value=l;sl.style.setProperty('--fill',(l-f.min)/(f.max-f.min)*100+'%')}
+   if(pl)[...pl.children].forEach((x,s)=>{x.classList.toggle('on',p<f.mx&&p%f.S===s);x.disabled=p>=f.mx});
+   if(sr)[...sr.children].forEach((x,i)=>x.classList.toggle('on',i<l));
+   if(qk)[...qk.children].forEach((x,i)=>x.classList.toggle('on',p===(f.quick[i]-f.min)*f.S))});
+ });
+}
+function change(id,p,isT){
+ if(isT)tgt[id]=Math.max(p,eff(id,cur));
+ else{const o=cur[id];cur[id]=p;tgt[id]=tgt[id]===o?p:Math.max(tgt[id],p)}
+ sync();
+}
+const fm=x=>(Math.round(x*10)/10).toLocaleString('ja-JP');
+function sync(){
+ F.forEach(f=>tgt[f.id]=Math.max(tgt[f.id],eff(f.id,cur)));
+ ctls.forEach(u=>u());
+ const P={sp:+document.getElementById('psp').value||0,st:+document.getElementById('pst').value||0};
+ const T={frag:0,sp:0,st:0,yen:0};let h='';
+ F.forEach(f=>{
+  const c=eff(f.id,cur),t=Math.max(unl(f.id,tgt)?tgt[f.id]:c,c);
+  if(t===c)return;
+  const g=k=>f.cum[k]?f.cum[k][t]-f.cum[k][c]:0;
+  const v={frag:g('frag'),sp:g('sp'),st:g('st')};v.yen=v.sp*P.sp+v.st*P.st;
+  for(const k in T)T[k]+=v[k];
+  const e=[];
+  if(f.c.frag)e.push(['英雄破片',fm(v.frag)]);
+  if(f.c.sp)e.push(['専用Lv1',fm(v.sp)+' <small style="display:inline">('+fm(v.sp*25)+'破片)</small>']);
+  if(f.c.st)e.push(['覚醒の石',fm(v.st)]);
+  if(v.yen)e.push(['推定金額','¥'+fm(v.yen),1]);
+  const lk=!unl(f.id,cur)&&!unl(f.id,tgt);
+  h+='<div class="rb" style="--c:'+f.col+(lk?';opacity:.45':'')+'"><div class="rn"><span>'+f.name+'</span><span class="rm">'+(lk?'🔒 未解禁':lab(f,c)+'　→　'+lab(f,t))+'</span></div><div class="rv">'+e.map(x=>'<div><small>'+x[0]+'</small><b'+(x[2]?' class="y"':'')+'>'+x[1]+'</b></div>').join('')+'</div></div>';
+ });
+ document.getElementById('rows').innerHTML=h||'<p class="note">変更のある項目はありません。</p>';
+ document.getElementById('tot').innerHTML=
+  '<div><small>英雄破片（直接）</small><strong>'+fm(T.frag)+'</strong></div>'+
+  '<div><small>専用Lv1スキル</small><strong>'+fm(T.sp)+'</strong><small>('+fm(T.sp*25)+'破片)</small></div>'+
+  
+  '<div><small>覚醒の石</small><strong>'+fm(T.st)+'</strong></div>'+
+  '<div class="gold"><small>推定金額 合計</small><strong>¥'+fm(T.yen)+'</strong></div>';
+}
+build(document.getElementById('pc'),cur,false);
+build(document.getElementById('pt'),tgt,true);
+document.getElementById('rs').onclick=()=>{F.forEach(f=>tgt[f.id]=eff(f.id,cur));sync()};
+['psp','pst'].forEach(i=>document.getElementById(i).oninput=sync);
+document.querySelectorAll('.card-header,.sub-h').forEach(h=>{const t=()=>h.parentNode.classList.toggle('collapsed');h.onclick=t;h.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();t()}}});
+sync();
+</script></div></body></html>
