@@ -25,8 +25,8 @@
       title: '他のツール',
       // url が空('')の項目は「準備中」。newTab:true で別タブ。
       items: [
-        { name: '英雄育成-素材計算', url: 'index.html' },
         { name: '強さ計算ツール（複合）', url: 'https://va-naporilab.github.io/herotitangearcalculator/' },
+        { name: '英雄育成-素材計算', url: 'https://va-naporilab.github.io/herolevelingresources/' },
         { name: '装備バフ比較・換算値', url: 'https://va-naporilab.github.io/equipmentbuff-evaluator/' },
         { name: 'ナポリ探究所 - ツール集', url: 'https://sites.google.com/view/naporilab/tools' },
         { name: 'X（Twitter）- なぽ', url: 'https://x.com/naporitan1_3531' }
